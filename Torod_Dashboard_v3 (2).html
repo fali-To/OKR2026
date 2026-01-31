@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOROD 2026 OKRs Command Center - LIVE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        * { font-family: 'Inter', sans-serif; }
+        body { background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%); min-height: 100vh; }
+        .gradient-header { background: linear-gradient(135deg, #0f172a 0%, #312e81 50%, #581c87 100%); }
+        .card { background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.05); }
+        .glass { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
+        .progress-bar { height: 6px; border-radius: 3px; background: #e5e7eb; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
+        .status-green { background: #dcfce7; color: #166534; }
+        .status-yellow { background: #fef3c7; color: #92400e; }
+        .status-red { background: #fee2e2; color: #991b1b; }
+        .tab-active { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; box-shadow: 0 4px 12px rgba(79,70,229,0.4); }
+        .engine-card { transition: all 0.3s ease; border-left: 4px solid; }
+        .engine-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+        .kpi-card { transition: all 0.2s ease; }
+        .kpi-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #6366f1; border-radius: 50%; width: 32px; height: 32px; animation: spin 0.8s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .pulse { animation: pulse 2s infinite; }
+        .live-dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; animation: pulse 1.5s infinite; }
+        
+        /* Quarter Selector */
+        .quarter-btn { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; transition: all 0.2s; cursor: pointer; border: 2px solid transparent; }
+        .quarter-btn:hover { background: rgba(255,255,255,0.2); }
+        .quarter-btn.active { background: white; color: #4f46e5; border-color: white; }
+        .quarter-btn.q-passed { opacity: 0.7; }
+        .quarter-btn.q-current { box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.5); }
+        
+        /* Mode Toggle */
+        .mode-toggle { display: flex; background: rgba(255,255,255,0.15); border-radius: 10px; padding: 4px; }
+        .mode-btn { padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; transition: all 0.2s; cursor: pointer; }
+        .mode-btn:hover { background: rgba(255,255,255,0.1); }
+        .mode-btn.active { background: white; color: #4f46e5; }
+        
+        /* Badge */
+        .mode-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .mode-badge.quarterly { background: #dbeafe; color: #1d4ed8; }
+        .mode-badge.annual { background: #fae8ff; color: #a21caf; }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="gradient-header text-white">
+        <div class="max-w-7xl mx-auto px-4 py-6">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-4">
+                    <img src="data:image/jpeg;base64,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" class="w-14 h-14 rounded-2xl shadow-lg shadow-indigo-500/30 object-cover" alt="Torod Logo">
+                    <div>
+                        <h1 class="text-2xl font-bold">TOROD 2026 OKRs Command Center</h1>
+                        <p class="text-indigo-200 text-sm flex items-center gap-2">
+                            <span class="live-dot"></span>
+                            Live Google Sheets via Apps Script
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="text-right text-sm">
+                        <div class="text-indigo-300">Last Synced</div>
+                        <div id="lastUpdate" class="font-medium">Loading...</div>
+                    </div>
+                    <button onclick="refreshData()" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-sm font-medium flex items-center gap-2 transition-all">
+                        <span id="refreshIcon">🔄</span> Refresh
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Quarter Selector & Mode Toggle -->
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                <!-- Quarter Selector -->
+                <div class="flex items-center gap-2">
+                    <span class="text-indigo-200 text-sm mr-2">Select Quarter:</span>
+                    <button onclick="setQuarter(1)" id="q1-btn" class="quarter-btn">Q1</button>
+                    <button onclick="setQuarter(2)" id="q2-btn" class="quarter-btn active q-current">Q2</button>
+                    <button onclick="setQuarter(3)" id="q3-btn" class="quarter-btn">Q3</button>
+                    <button onclick="setQuarter(4)" id="q4-btn" class="quarter-btn">Q4</button>
+                </div>
+                
+                <!-- Mode Toggle -->
+                <div class="mode-toggle">
+                    <button onclick="setMode('quarterly')" id="mode-quarterly" class="mode-btn active">📊 Quarterly</button>
+                    <button onclick="setMode('annual')" id="mode-annual" class="mode-btn">📅 Annual</button>
+                </div>
+            </div>
+            
+            <!-- Company Anchors -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="glass rounded-xl p-4">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-indigo-200 text-xs">Total Revenue YTD</span>
+                        <span class="mode-badge quarterly" id="revenueBadge">Q2</span>
+                    </div>
+                    <div class="text-2xl font-bold" id="totalRevenue">Loading...</div>
+                    <div class="flex items-center justify-between mt-1">
+                        <span class="text-xs text-indigo-300" id="revenueTarget">of SAR --</span>
+                        <span class="text-xs text-green-300" id="revenuePercent">--%</span>
+                    </div>
+                    <div class="h-2 bg-white/20 rounded-full mt-2">
+                        <div class="h-full bg-green-400 rounded-full transition-all" id="revenueProgress" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="glass rounded-xl p-4">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-indigo-200 text-xs">Total Labels YTD</span>
+                        <span class="mode-badge quarterly" id="labelsBadge">Q2</span>
+                    </div>
+                    <div class="text-2xl font-bold" id="totalLabels">Loading...</div>
+                    <div class="flex items-center justify-between mt-1">
+                        <span class="text-xs text-indigo-300" id="labelsTarget">of --</span>
+                        <span class="text-xs text-yellow-300" id="labelsPercent">--%</span>
+                    </div>
+                    <div class="h-2 bg-white/20 rounded-full mt-2">
+                        <div class="h-full bg-yellow-400 rounded-full transition-all" id="labelsProgress" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="glass rounded-xl p-4">
+                    <div class="text-indigo-200 text-xs mb-1">Selected Quarter</div>
+                    <div class="text-2xl font-bold" id="currentQuarterDisplay">Q2</div>
+                    <div class="text-xs text-indigo-300" id="quarterDetail">Apr - Jun 2026</div>
+                </div>
+                <div class="glass rounded-xl p-4">
+                    <div class="text-indigo-200 text-xs mb-1">View Mode</div>
+                    <div class="text-2xl font-bold" id="viewModeDisplay">Quarterly</div>
+                    <div class="text-xs text-indigo-300" id="viewModeDetail">Progress vs Q2 Target</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="max-w-7xl mx-auto px-4 -mt-4 mb-6">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+            <div class="bg-white rounded-xl shadow-lg p-1.5 inline-flex gap-1 flex-wrap">
+                <button onclick="switchTab('overview')" id="tab-overview" class="tab-active px-4 py-2.5 rounded-lg text-sm font-medium transition-all">📊 Overview</button>
+                <button onclick="switchTab('revenue')" id="tab-revenue" class="px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 transition-all">💰 Revenue</button>
+                <button onclick="switchTab('engines')" id="tab-engines" class="px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 transition-all">⚙️ All Engines</button>
+                <button onclick="switchTab('operations')" id="tab-operations" class="px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 transition-all">🚚 Operations</button>
+                <button onclick="switchTab('growth')" id="tab-growth" class="px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 transition-all">📈 Growth</button>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2 bg-white rounded-lg px-3 py-2 shadow">
+                    <div id="connectionDot" class="w-2.5 h-2.5 rounded-full bg-yellow-500 pulse"></div>
+                    <span id="connectionStatus" class="text-sm text-gray-600">Connecting...</span>
+                </div>
+                <a href="https://docs.google.com/spreadsheets/d/1E8FYwCHpN1oOqz-V5rDvb6WaVQbjCjJ_ywAspSrMqSU/edit" target="_blank" 
+                   class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg font-medium shadow-lg shadow-green-600/30 transition-all">
+                    📊 Edit Google Sheet
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 pb-8">
+        
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="text-center py-16">
+            <div class="loader mx-auto mb-4"></div>
+            <p class="text-gray-600">Fetching live data from Google Sheets...</p>
+        </div>
+
+        <!-- Error Message -->
+        <div id="errorMessage" class="hidden text-center py-16">
+            <div class="text-5xl mb-4">⚠️</div>
+            <p class="text-gray-600 font-medium">Unable to fetch data</p>
+            <p class="text-sm text-gray-400 mt-2" id="errorDetail">Check your connection</p>
+            <button onclick="refreshData()" class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg">Try Again</button>
+        </div>
+
+        <!-- ==================== OVERVIEW TAB ==================== -->
+        <div id="content-overview" class="hidden space-y-6">
+            
+            <!-- View Mode Info Banner -->
+            <div id="viewModeBanner" class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl" id="bannerIcon">📊</span>
+                    <div>
+                        <span class="font-medium text-blue-800" id="bannerTitle">Quarterly View - Q2</span>
+                        <span class="text-blue-600 text-sm ml-2" id="bannerSubtitle">Showing progress against Q2 2026 targets</span>
+                    </div>
+                </div>
+                <div class="text-sm" id="targetSource">
+                    <span class="text-blue-600">Targets from: </span>
+                    <span class="font-medium text-blue-800" id="targetSourceText">Google Sheet</span>
+                </div>
+            </div>
+
+            <!-- L1 Priorities -->
+            <div class="card p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-bold text-gray-800">L1 Company Priorities</h2>
+                    <span class="mode-badge quarterly" id="l1Badge">Q2</span>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4" id="l1Priorities"></div>
+            </div>
+
+            <!-- Department Health Grid -->
+            <div class="card p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-bold text-gray-800">Department Health Overview</h2>
+                    <span class="mode-badge quarterly" id="deptBadge">Q2</span>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3" id="departmentHealth"></div>
+            </div>
+            
+            <!-- Charts Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="card p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Quarterly Labels Progress</h3>
+                    <canvas id="quarterlyChart" height="220"></canvas>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Revenue by Stream</h3>
+                    <canvas id="revenueDonutChart" height="220"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== REVENUE TAB ==================== -->
+        <div id="content-revenue" class="hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="card p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Revenue by Stream</h3>
+                    <canvas id="revenueBarChart" height="300"></canvas>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Revenue Distribution</h3>
+                    <canvas id="revenuePieChart" height="300"></canvas>
+                </div>
+            </div>
+            
+            <div class="card overflow-hidden">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600">Stream</th>
+                            <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600" id="targetHeader">Q2 Target</th>
+                            <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600">Actual</th>
+                            <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600">Progress</th>
+                            <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="revenueTableBody" class="divide-y"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ==================== ENGINES TAB ==================== -->
+        <div id="content-engines" class="hidden space-y-4"></div>
+
+        <!-- ==================== OPERATIONS TAB ==================== -->
+        <div id="content-operations" class="hidden space-y-6">
+            <div class="card p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-bold text-gray-800">🚚 Operations KPIs</h2>
+                    <span class="mode-badge quarterly" id="opsBadge">Q2</span>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="operationsKPIs"></div>
+            </div>
+        </div>
+
+        <!-- ==================== GROWTH TAB ==================== -->
+        <div id="content-growth" class="hidden space-y-6">
+            <div class="card overflow-hidden">
+                <div class="p-4 bg-red-50 border-b border-red-100">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">📣</span>
+                            <h2 class="text-lg font-bold text-gray-800">Marketing Engine</h2>
+                        </div>
+                        <span class="mode-badge quarterly" id="marketingBadge">Q2</span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4" id="marketingKPIs"></div>
+                </div>
+            </div>
+            
+            <div class="card overflow-hidden">
+                <div class="p-4 bg-indigo-50 border-b border-indigo-100">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">💻</span>
+                            <h2 class="text-lg font-bold text-gray-800">SaaS Engine</h2>
+                        </div>
+                        <span class="mode-badge quarterly" id="saasBadge">Q2</span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4" id="saasKPIs"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="max-w-7xl mx-auto px-4 py-6 text-center text-sm text-gray-500 border-t bg-white/50">
+        <p class="font-medium">Torod 2026 OKRs Command Center</p>
+        <p class="text-xs mt-1">🟢 Live via Apps Script • Auto-refresh every 2 minutes • <span id="footerMode">Quarterly Q2 View</span></p>
+    </div>
+
+    <script>
+        // ===========================================
+        // CONFIGURATION
+        // ===========================================
+        var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxVvmPqt2j7ekyYiVTWezRQxsb3ZJs1VrvqRelzeFmj_v8tZU4p7592CnTaEkfLyf8/exec';
+        
+        // View settings
+        var viewMode = 'quarterly'; // 'quarterly' or 'annual'
+        var selectedQuarter = 2; // 1, 2, 3, or 4
+        
+        var quarterDates = {
+            1: 'Jan - Mar 2026',
+            2: 'Apr - Jun 2026',
+            3: 'Jul - Sep 2026',
+            4: 'Oct - Dec 2026'
+        };
+        
+        // Data storage
+        var sheetActuals = {};
+        var sheetTargets = { Q1: {}, Q2: {}, Q3: {}, Q4: {} };
+        var hasSheetTargets = false;
+        
+        // Fallback targets (used if sheet doesn't have Targets tab)
+        var FALLBACK_TARGETS = {
+            Q1: {
+                'Total Labels YTD': 418000,
+                'Total Revenue YTD (SAR)': 23100000,
+                'L1.1 Core Logistics Revenue (SAR)': 10100000,
+                'L1.2 Government Revenue (SAR)': 5000000,
+                'L1.3 Nusuk Revenue (SAR)': 3200000,
+                'L1.4 Infrastructure Revenue (SAR)': 2625000,
+                'L1.5 SaaS Revenue (SAR)': 575000,
+                'L1.6 Platform Services Revenue (SAR)': 1600000,
+                'Micro: Labels Delivered': 229254,
+                'Enterprise: Labels Delivered': 90900,
+                'Corporate: Labels Delivered': 126500,
+                'Marketplace: Labels Delivered': 40400,
+                'Ops: On-Time Delivery Rate (%)': 96,
+                'Marketing: New Merchants Acquired': 925,
+                'SaaS: Merchants Acquired': 413
+            },
+            Q2: {
+                'Total Labels YTD': 837000,
+                'Total Revenue YTD (SAR)': 46200000,
+                'L1.1 Core Logistics Revenue (SAR)': 20200000,
+                'L1.2 Government Revenue (SAR)': 10000000,
+                'L1.3 Nusuk Revenue (SAR)': 6400000,
+                'L1.4 Infrastructure Revenue (SAR)': 5250000,
+                'L1.5 SaaS Revenue (SAR)': 1150000,
+                'L1.6 Platform Services Revenue (SAR)': 3200000,
+                'Micro: Labels Delivered': 458508,
+                'Enterprise: Labels Delivered': 181800,
+                'Corporate: Labels Delivered': 253000,
+                'Marketplace: Labels Delivered': 80800,
+                'Ops: On-Time Delivery Rate (%)': 96,
+                'Marketing: New Merchants Acquired': 1850,
+                'SaaS: Merchants Acquired': 825
+            },
+            Q3: {
+                'Total Labels YTD': 1395000,
+                'Total Revenue YTD (SAR)': 69300000,
+                'L1.1 Core Logistics Revenue (SAR)': 30300000,
+                'L1.2 Government Revenue (SAR)': 15000000,
+                'L1.3 Nusuk Revenue (SAR)': 9600000,
+                'L1.4 Infrastructure Revenue (SAR)': 7875000,
+                'L1.5 SaaS Revenue (SAR)': 1725000,
+                'L1.6 Platform Services Revenue (SAR)': 4800000,
+                'Micro: Labels Delivered': 687762,
+                'Enterprise: Labels Delivered': 272700,
+                'Corporate: Labels Delivered': 379500,
+                'Marketplace: Labels Delivered': 121200,
+                'Ops: On-Time Delivery Rate (%)': 96,
+                'Marketing: New Merchants Acquired': 2775,
+                'SaaS: Merchants Acquired': 1238
+            },
+            Q4: {
+                'Total Labels YTD': 2020000,
+                'Total Revenue YTD (SAR)': 92400000,
+                'L1.1 Core Logistics Revenue (SAR)': 40400000,
+                'L1.2 Government Revenue (SAR)': 20000000,
+                'L1.3 Nusuk Revenue (SAR)': 12800000,
+                'L1.4 Infrastructure Revenue (SAR)': 10500000,
+                'L1.5 SaaS Revenue (SAR)': 2300000,
+                'L1.6 Platform Services Revenue (SAR)': 6400000,
+                'Micro: Labels Delivered': 917016,
+                'Enterprise: Labels Delivered': 363600,
+                'Corporate: Labels Delivered': 506000,
+                'Marketplace: Labels Delivered': 161600,
+                'Ops: On-Time Delivery Rate (%)': 96,
+                'Marketing: New Merchants Acquired': 3700,
+                'SaaS: Merchants Acquired': 1650
+            }
+        };
+
+        // Chart instances
+        var quarterlyChart, revenueDonutChart, revenueBarChart, revenuePieChart;
+
+        // ===========================================
+        // QUARTER & MODE SELECTION
+        // ===========================================
+        function setQuarter(q) {
+            selectedQuarter = q;
+            
+            // Update button styles
+            for (var i = 1; i <= 4; i++) {
+                var btn = document.getElementById('q' + i + '-btn');
+                btn.classList.remove('active');
+                if (i === q) btn.classList.add('active');
+            }
+            
+            updateUI();
+            updateDashboard();
+        }
+        
+        function setMode(mode) {
+            viewMode = mode;
+            
+            document.getElementById('mode-quarterly').classList.remove('active');
+            document.getElementById('mode-annual').classList.remove('active');
+            document.getElementById('mode-' + mode).classList.add('active');
+            
+            updateUI();
+            updateDashboard();
+        }
+        
+        function updateUI() {
+            var qText = 'Q' + selectedQuarter;
+            var modeText = viewMode === 'annual' ? 'Annual' : qText;
+            var banner = document.getElementById('viewModeBanner');
+            
+            // Update quarter display
+            document.getElementById('currentQuarterDisplay').textContent = qText;
+            document.getElementById('quarterDetail').textContent = quarterDates[selectedQuarter];
+            
+            // Update view mode display
+            document.getElementById('viewModeDisplay').textContent = viewMode === 'annual' ? 'Annual' : 'Quarterly';
+            document.getElementById('viewModeDetail').textContent = viewMode === 'annual' ? 'Progress vs 2026 Target' : 'Progress vs ' + qText + ' Target';
+            
+            // Update banner
+            if (viewMode === 'annual') {
+                banner.className = 'bg-purple-50 border border-purple-200 rounded-xl p-4 flex items-center justify-between';
+                document.getElementById('bannerIcon').textContent = '📅';
+                document.getElementById('bannerTitle').textContent = 'Annual View';
+                document.getElementById('bannerTitle').className = 'font-medium text-purple-800';
+                document.getElementById('bannerSubtitle').textContent = 'Showing progress against 2026 full year targets';
+                document.getElementById('bannerSubtitle').className = 'text-purple-600 text-sm ml-2';
+            } else {
+                banner.className = 'bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center justify-between';
+                document.getElementById('bannerIcon').textContent = '📊';
+                document.getElementById('bannerTitle').textContent = 'Quarterly View - ' + qText;
+                document.getElementById('bannerTitle').className = 'font-medium text-blue-800';
+                document.getElementById('bannerSubtitle').textContent = 'Showing progress against ' + qText + ' 2026 targets';
+                document.getElementById('bannerSubtitle').className = 'text-blue-600 text-sm ml-2';
+            }
+            
+            // Update target source
+            document.getElementById('targetSourceText').textContent = hasSheetTargets ? 'Targets Sheet ✓' : 'Built-in Defaults';
+            
+            // Update badges
+            var badges = ['revenueBadge', 'labelsBadge', 'l1Badge', 'deptBadge', 'opsBadge', 'marketingBadge', 'saasBadge'];
+            badges.forEach(function(id) {
+                var badge = document.getElementById(id);
+                if (badge) {
+                    badge.textContent = modeText;
+                    badge.className = 'mode-badge ' + (viewMode === 'annual' ? 'annual' : 'quarterly');
+                }
+            });
+            
+            // Update footer
+            document.getElementById('footerMode').textContent = viewMode === 'annual' ? 'Annual View' : 'Quarterly ' + qText + ' View';
+            document.getElementById('targetHeader').textContent = viewMode === 'annual' ? 'Annual Target' : qText + ' Target';
+        }
+
+        // ===========================================
+        // UTILITY FUNCTIONS
+        // ===========================================
+        function formatNumber(num) {
+            if (num === null || num === undefined || isNaN(num)) return '0';
+            num = parseFloat(num);
+            if (Math.abs(num) >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (Math.abs(num) >= 1000) return (num / 1000).toFixed(0) + 'K';
+            return num.toLocaleString();
+        }
+
+        function formatCurrency(num) {
+            return 'SAR ' + formatNumber(num);
+        }
+
+        function parseNum(value) {
+            if (typeof value === 'number') return value;
+            if (!value) return 0;
+            var cleaned = String(value).replace(/[^0-9.-]/g, '');
+            return parseFloat(cleaned) || 0;
+        }
+
+        function getStatus(progress) {
+            if (progress >= 0.7) return { status: 'On Track', color: '#10b981', class: 'status-green' };
+            if (progress >= 0.4) return { status: 'At Risk', color: '#f59e0b', class: 'status-yellow' };
+            return { status: 'Behind', color: '#ef4444', class: 'status-red' };
+        }
+
+        function getTarget(metricName) {
+            var qKey = 'Q' + selectedQuarter;
+            
+            if (viewMode === 'annual') {
+                // Annual = Q4 targets
+                if (hasSheetTargets && sheetTargets.Q4[metricName] !== undefined) {
+                    return parseNum(sheetTargets.Q4[metricName]);
+                }
+                return FALLBACK_TARGETS.Q4[metricName] || 100;
+            } else {
+                // Quarterly targets
+                if (hasSheetTargets && sheetTargets[qKey][metricName] !== undefined) {
+                    return parseNum(sheetTargets[qKey][metricName]);
+                }
+                return (FALLBACK_TARGETS[qKey] && FALLBACK_TARGETS[qKey][metricName]) || 100;
+            }
+        }
+
+        function getActual(metricName) {
+            return parseNum(sheetActuals[metricName]) || 0;
+        }
+
+        // ===========================================
+        // KPI CARD GENERATOR
+        // ===========================================
+        function createKPICard(name, actual, target, color) {
+            color = color || '#6366f1';
+            actual = parseNum(actual);
+            target = parseNum(target) || 100;
+            
+            var isInverse = name.indexOf('Exception') !== -1 || 
+                           name.indexOf('Outages') !== -1 || 
+                           (name.indexOf('Support Tickets') !== -1 && name.indexOf('SLA') === -1);
+            
+            var progress;
+            if (isInverse) {
+                progress = actual === 0 ? 1 : Math.min(target / actual, 1);
+            } else {
+                progress = target > 0 ? Math.min(actual / target, 1.5) : 0;
+            }
+            
+            var status = getStatus(Math.min(progress, 1));
+            
+            var displayActual, displayTarget;
+            var nameLower = (name || '').toLowerCase();
+            
+            if (nameLower.indexOf('(sar)') !== -1 || nameLower.indexOf('revenue') !== -1 || nameLower.indexOf('mrr') !== -1 || nameLower.indexOf('pipeline') !== -1) {
+                displayActual = formatCurrency(actual);
+                displayTarget = formatCurrency(target);
+            } else if (nameLower.indexOf('(%)') !== -1 || nameLower.indexOf('rate') !== -1) {
+                displayActual = actual.toFixed(1) + '%';
+                displayTarget = target.toFixed(1) + '%';
+            } else {
+                displayActual = formatNumber(actual);
+                displayTarget = formatNumber(target);
+            }
+            
+            var shortName = name.replace(/^(Micro|Enterprise|Corporate|Marketplace|Government|Marketing|Ops|SaaS):\s*/i, '');
+
+            return '<div class="bg-white rounded-lg p-3 shadow-sm border border-gray-100 kpi-card">' +
+                '<div class="flex justify-between items-start mb-2">' +
+                    '<span class="text-xs text-gray-500 font-medium truncate" title="' + name + '">' + shortName + '</span>' +
+                    '<span class="text-xs px-1.5 py-0.5 rounded ' + status.class + ' whitespace-nowrap ml-1">' + status.status + '</span>' +
+                '</div>' +
+                '<div class="flex items-end gap-1 mb-2">' +
+                    '<span class="text-lg font-bold text-gray-900">' + displayActual + '</span>' +
+                    '<span class="text-xs text-gray-400 mb-0.5">/ ' + displayTarget + '</span>' +
+                '</div>' +
+                '<div class="progress-bar">' +
+                    '<div class="progress-fill" style="width: ' + Math.min(progress * 100, 100) + '%; background: ' + status.color + '"></div>' +
+                '</div>' +
+                '<div class="text-xs text-right mt-1 text-gray-400">' + (progress * 100).toFixed(0) + '%</div>' +
+            '</div>';
+        }
+
+        // ===========================================
+        // TAB SWITCHING
+        // ===========================================
+        function switchTab(tabId) {
+            document.querySelectorAll('[id^="content-"]').forEach(function(el) { el.classList.add('hidden'); });
+            document.getElementById('content-' + tabId).classList.remove('hidden');
+            
+            document.querySelectorAll('[id^="tab-"]').forEach(function(el) {
+                el.classList.remove('tab-active');
+                el.classList.add('text-gray-600', 'hover:bg-gray-100');
+            });
+            document.getElementById('tab-' + tabId).classList.add('tab-active');
+            document.getElementById('tab-' + tabId).classList.remove('text-gray-600', 'hover:bg-gray-100');
+            
+            setTimeout(function() {
+                if (tabId === 'revenue') updateRevenueCharts();
+            }, 100);
+        }
+
+        // ===========================================
+        // FETCH DATA
+        // ===========================================
+        function fetchData() {
+            return fetch(APPS_SCRIPT_URL)
+                .then(function(response) {
+                    if (!response.ok) throw new Error('Network error: ' + response.status);
+                    return response.json();
+                });
+        }
+
+        // ===========================================
+        // REFRESH DATA
+        // ===========================================
+        function refreshData() {
+            document.getElementById('loadingIndicator').classList.remove('hidden');
+            document.getElementById('errorMessage').classList.add('hidden');
+            document.getElementById('content-overview').classList.add('hidden');
+            document.getElementById('refreshIcon').textContent = '⏳';
+            document.getElementById('connectionDot').className = 'w-2.5 h-2.5 rounded-full bg-yellow-500 pulse';
+            document.getElementById('connectionStatus').textContent = 'Syncing...';
+            
+            fetchData()
+                .then(function(response) {
+                    // Handle new format (actuals + targets) or old format (data)
+                    if (response.actuals) {
+                        sheetActuals = response.actuals;
+                        if (response.targets) {
+                            sheetTargets = response.targets;
+                            hasSheetTargets = Object.keys(response.targets.Q1 || {}).length > 0;
+                        }
+                    } else if (response.data) {
+                        // Old format - extract actuals from data
+                        sheetActuals = {};
+                        for (var key in response.data) {
+                            if (key !== 'Metric') {
+                                sheetActuals[key] = response.data[key].actual;
+                            }
+                        }
+                        hasSheetTargets = false;
+                    }
+                    
+                    document.getElementById('loadingIndicator').classList.add('hidden');
+                    document.getElementById('content-overview').classList.remove('hidden');
+                    document.getElementById('refreshIcon').textContent = '🔄';
+                    document.getElementById('connectionDot').className = 'w-2.5 h-2.5 rounded-full bg-green-500';
+                    document.getElementById('connectionStatus').textContent = 'Live';
+                    document.getElementById('lastUpdate').textContent = new Date().toLocaleString();
+                    
+                    updateUI();
+                    updateDashboard();
+                })
+                .catch(function(error) {
+                    console.error('Failed to fetch:', error);
+                    document.getElementById('loadingIndicator').classList.add('hidden');
+                    document.getElementById('errorMessage').classList.remove('hidden');
+                    document.getElementById('errorDetail').textContent = error.message;
+                    document.getElementById('refreshIcon').textContent = '🔄';
+                    document.getElementById('connectionDot').className = 'w-2.5 h-2.5 rounded-full bg-red-500';
+                    document.getElementById('connectionStatus').textContent = 'Offline';
+                });
+        }
+
+        // ===========================================
+        // UPDATE DASHBOARD
+        // ===========================================
+        function updateDashboard() {
+            try {
+                updateAnchors();
+                updateL1Priorities();
+                updateDepartmentHealth();
+                updateQuarterlyChart();
+                updateRevenueDonutChart();
+                updateEnginesTab();
+                updateOperationsTab();
+                updateGrowthTab();
+            } catch (e) {
+                console.error('Dashboard update error:', e);
+            }
+        }
+
+        function updateAnchors() {
+            var revenueActual = getActual('Total Revenue YTD (SAR)');
+            var revenueTarget = getTarget('Total Revenue YTD (SAR)');
+            document.getElementById('totalRevenue').textContent = formatCurrency(revenueActual);
+            document.getElementById('revenueTarget').textContent = 'of ' + formatCurrency(revenueTarget);
+            var revPercent = revenueTarget > 0 ? (revenueActual / revenueTarget * 100) : 0;
+            document.getElementById('revenuePercent').textContent = revPercent.toFixed(1) + '%';
+            document.getElementById('revenueProgress').style.width = Math.min(revPercent, 100) + '%';
+            
+            var labelsActual = getActual('Total Labels YTD');
+            var labelsTarget = getTarget('Total Labels YTD');
+            document.getElementById('totalLabels').textContent = formatNumber(labelsActual);
+            document.getElementById('labelsTarget').textContent = 'of ' + formatNumber(labelsTarget);
+            var labPercent = labelsTarget > 0 ? (labelsActual / labelsTarget * 100) : 0;
+            document.getElementById('labelsPercent').textContent = labPercent.toFixed(1) + '%';
+            document.getElementById('labelsProgress').style.width = Math.min(labPercent, 100) + '%';
+        }
+
+        function updateL1Priorities() {
+            var priorities = [
+                { id: 'L1.1', name: 'Core Logistics', key: 'L1.1 Core Logistics Revenue (SAR)', color: '#6366f1' },
+                { id: 'L1.2', name: 'Government', key: 'L1.2 Government Revenue (SAR)', color: '#10b981' },
+                { id: 'L1.3', name: 'Nusuk', key: 'L1.3 Nusuk Revenue (SAR)', color: '#8b5cf6' },
+                { id: 'L1.4', name: 'Infrastructure', key: 'L1.4 Infrastructure Revenue (SAR)', color: '#06b6d4' },
+                { id: 'L1.5', name: 'SaaS', key: 'L1.5 SaaS Revenue (SAR)', color: '#f97316' },
+                { id: 'L1.6', name: 'Platform', key: 'L1.6 Platform Services Revenue (SAR)', color: '#f59e0b' }
+            ];
+            
+            var html = '';
+            for (var i = 0; i < priorities.length; i++) {
+                var p = priorities[i];
+                var actual = getActual(p.key);
+                var target = getTarget(p.key);
+                var progress = target > 0 ? actual / target : 0;
+                var status = getStatus(progress);
+                
+                html += '<div class="p-4 rounded-xl" style="background: ' + p.color + '10; border-left: 3px solid ' + p.color + '">' +
+                    '<div class="text-xs text-gray-500 mb-1">' + p.id + '</div>' +
+                    '<div class="text-sm font-medium text-gray-800 mb-2">' + p.name + '</div>' +
+                    '<div class="text-xl font-bold text-gray-900">' + (progress * 100).toFixed(0) + '%</div>' +
+                    '<div class="text-xs text-gray-500">' + formatCurrency(actual) + ' / ' + formatCurrency(target) + '</div>' +
+                    '<div class="progress-bar mt-2">' +
+                        '<div class="progress-fill" style="width: ' + Math.min(progress * 100, 100) + '%; background: ' + status.color + '"></div>' +
+                    '</div>' +
+                '</div>';
+            }
+            document.getElementById('l1Priorities').innerHTML = html;
+        }
+
+        function updateDepartmentHealth() {
+            var departments = [
+                { name: 'Micro', icon: '📦', prefix: 'Micro:', color: '#f97316' },
+                { name: 'Enterprise', icon: '🏢', prefix: 'Enterprise:', color: '#06b6d4' },
+                { name: 'Corporate', icon: '🏛️', prefix: 'Corporate:', color: '#8b5cf6' },
+                { name: 'Marketplace', icon: '🌐', prefix: 'Marketplace:', color: '#f59e0b' },
+                { name: 'Government', icon: '🏦', prefix: 'Government:', color: '#10b981' },
+                { name: 'Marketing', icon: '📣', prefix: 'Marketing:', color: '#ef4444' },
+                { name: 'Operations', icon: '🚚', prefix: 'Ops:', color: '#14b8a6' },
+                { name: 'SaaS', icon: '💻', prefix: 'SaaS:', color: '#6366f1' }
+            ];
+            
+            var html = '';
+            for (var i = 0; i < departments.length; i++) {
+                var dept = departments[i];
+                var totalProgress = 0;
+                var count = 0;
+                
+                for (var key in sheetActuals) {
+                    if (key.indexOf(dept.prefix) === 0) {
+                        var actual = parseNum(sheetActuals[key]);
+                        var target = getTarget(key);
+                        if (target > 0) {
+                            totalProgress += Math.min(actual / target, 1);
+                            count++;
+                        }
+                    }
+                }
+                
+                var avgProgress = count > 0 ? totalProgress / count : 0;
+                var status = getStatus(avgProgress);
+                
+                html += '<div class="p-3 rounded-xl bg-gray-50 text-center cursor-pointer hover:shadow-md transition-all" onclick="switchTab(\'engines\')">' +
+                    '<div class="text-2xl mb-1">' + dept.icon + '</div>' +
+                    '<div class="text-xs font-medium text-gray-700">' + dept.name + '</div>' +
+                    '<div class="text-lg font-bold mt-1" style="color: ' + dept.color + '">' + (avgProgress * 100).toFixed(0) + '%</div>' +
+                    '<div class="text-xs px-1.5 py-0.5 rounded mt-1 ' + status.class + '">' + status.status + '</div>' +
+                '</div>';
+            }
+            document.getElementById('departmentHealth').innerHTML = html;
+        }
+
+        function updateQuarterlyChart() {
+            var ctx = document.getElementById('quarterlyChart').getContext('2d');
+            if (quarterlyChart) quarterlyChart.destroy();
+            
+            var quarters = ['Q1', 'Q2', 'Q3', 'Q4'];
+            var actuals = [
+                getActual('Q1 Labels Actual') || 0,
+                getActual('Q2 Labels Actual') || 0,
+                getActual('Q3 Labels Actual') || 0,
+                getActual('Q4 Labels Actual') || 0
+            ];
+            var targets = [
+                (FALLBACK_TARGETS.Q1['Total Labels YTD'] || 418000) - 0,
+                (FALLBACK_TARGETS.Q2['Total Labels YTD'] || 837000) - (FALLBACK_TARGETS.Q1['Total Labels YTD'] || 418000),
+                (FALLBACK_TARGETS.Q3['Total Labels YTD'] || 1395000) - (FALLBACK_TARGETS.Q2['Total Labels YTD'] || 837000),
+                (FALLBACK_TARGETS.Q4['Total Labels YTD'] || 2020000) - (FALLBACK_TARGETS.Q3['Total Labels YTD'] || 1395000)
+            ];
+            
+            quarterlyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: quarters,
+                    datasets: [
+                        { label: 'Target', data: targets, backgroundColor: '#c7d2fe', borderRadius: 6 },
+                        { label: 'Actual', data: actuals, backgroundColor: '#6366f1', borderRadius: 6 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'bottom' } },
+                    scales: { y: { beginAtZero: true, ticks: { callback: function(value) { return formatNumber(value); } } } }
+                }
+            });
+        }
+
+        function updateRevenueDonutChart() {
+            var ctx = document.getElementById('revenueDonutChart').getContext('2d');
+            if (revenueDonutChart) revenueDonutChart.destroy();
+            
+            var streams = [
+                { name: 'Logistics', key: 'L1.1 Core Logistics Revenue (SAR)', color: '#6366f1' },
+                { name: 'Government', key: 'L1.2 Government Revenue (SAR)', color: '#10b981' },
+                { name: 'Nusuk', key: 'L1.3 Nusuk Revenue (SAR)', color: '#8b5cf6' },
+                { name: 'SaaS', key: 'L1.5 SaaS Revenue (SAR)', color: '#f97316' }
+            ];
+            
+            var labels = [];
+            var data = [];
+            var colors = [];
+            
+            for (var i = 0; i < streams.length; i++) {
+                var actual = getActual(streams[i].key);
+                if (actual > 0) {
+                    labels.push(streams[i].name);
+                    data.push(actual);
+                    colors.push(streams[i].color);
+                }
+            }
+            
+            if (data.length === 0) {
+                labels = ['No Data'];
+                data = [1];
+                colors = ['#e5e7eb'];
+            }
+            
+            revenueDonutChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: { labels: labels, datasets: [{ data: data, backgroundColor: colors }] },
+                options: { responsive: true, plugins: { legend: { position: 'right' } } }
+            });
+        }
+
+        function updateRevenueCharts() {
+            var streams = [
+                { name: 'Logistics', key: 'L1.1 Core Logistics Revenue (SAR)', color: '#6366f1' },
+                { name: 'Government', key: 'L1.2 Government Revenue (SAR)', color: '#10b981' },
+                { name: 'Nusuk', key: 'L1.3 Nusuk Revenue (SAR)', color: '#8b5cf6' },
+                { name: 'Infrastructure', key: 'L1.4 Infrastructure Revenue (SAR)', color: '#06b6d4' },
+                { name: 'SaaS', key: 'L1.5 SaaS Revenue (SAR)', color: '#f97316' },
+                { name: 'Platform', key: 'L1.6 Platform Services Revenue (SAR)', color: '#f59e0b' }
+            ];
+            
+            var data = [];
+            for (var i = 0; i < streams.length; i++) {
+                data.push({
+                    name: streams[i].name,
+                    color: streams[i].color,
+                    actual: getActual(streams[i].key),
+                    target: getTarget(streams[i].key)
+                });
+            }
+            
+            var barCtx = document.getElementById('revenueBarChart').getContext('2d');
+            if (revenueBarChart) revenueBarChart.destroy();
+            
+            var targetLabel = viewMode === 'annual' ? 'Annual Target' : 'Q' + selectedQuarter + ' Target';
+            revenueBarChart = new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(function(s) { return s.name; }),
+                    datasets: [
+                        { label: targetLabel, data: data.map(function(s) { return s.target; }), backgroundColor: '#c7d2fe' },
+                        { label: 'Actual', data: data.map(function(s) { return s.actual; }), backgroundColor: data.map(function(s) { return s.color; }) }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    plugins: { legend: { position: 'bottom' } },
+                    scales: { x: { ticks: { callback: function(value) { return formatNumber(value); } } } }
+                }
+            });
+
+            var pieCtx = document.getElementById('revenuePieChart').getContext('2d');
+            if (revenuePieChart) revenuePieChart.destroy();
+            
+            revenuePieChart = new Chart(pieCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.map(function(s) { return s.name; }),
+                    datasets: [{ data: data.map(function(s) { return s.actual; }), backgroundColor: data.map(function(s) { return s.color; }) }]
+                },
+                options: { responsive: true, plugins: { legend: { position: 'right' } } }
+            });
+            
+            var tableHtml = '';
+            for (var j = 0; j < data.length; j++) {
+                var s = data[j];
+                var progress = s.target > 0 ? s.actual / s.target : 0;
+                var status = getStatus(progress);
+                
+                tableHtml += '<tr class="hover:bg-gray-50">' +
+                    '<td class="px-4 py-3"><div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full" style="background: ' + s.color + '"></div><span class="font-medium">' + s.name + '</span></div></td>' +
+                    '<td class="px-4 py-3 text-right text-gray-600">' + formatCurrency(s.target) + '</td>' +
+                    '<td class="px-4 py-3 text-right font-medium">' + formatCurrency(s.actual) + '</td>' +
+                    '<td class="px-4 py-3"><div class="flex items-center gap-2 justify-center"><div class="w-16 h-2 bg-gray-100 rounded-full"><div class="h-full rounded-full" style="width: ' + Math.min(progress * 100, 100) + '%; background: ' + status.color + '"></div></div><span class="text-xs">' + (progress * 100).toFixed(0) + '%</span></div></td>' +
+                    '<td class="px-4 py-3 text-center"><span class="text-xs px-2 py-1 rounded-full ' + status.class + '">' + status.status + '</span></td>' +
+                '</tr>';
+            }
+            document.getElementById('revenueTableBody').innerHTML = tableHtml;
+        }
+
+        function updateEnginesTab() {
+            var engines = [
+                { name: 'Micro/Outbound', icon: '📦', prefix: 'Micro:', color: '#f97316', bgColor: '#fff7ed' },
+                { name: 'Enterprise', icon: '🏢', prefix: 'Enterprise:', color: '#06b6d4', bgColor: '#ecfeff' },
+                { name: 'Corporate', icon: '🏛️', prefix: 'Corporate:', color: '#8b5cf6', bgColor: '#f5f3ff' },
+                { name: 'Marketplace', icon: '🌐', prefix: 'Marketplace:', color: '#f59e0b', bgColor: '#fffbeb' },
+                { name: 'Government', icon: '🏦', prefix: 'Government:', color: '#10b981', bgColor: '#ecfdf5' },
+                { name: 'Marketing', icon: '📣', prefix: 'Marketing:', color: '#ef4444', bgColor: '#fef2f2' },
+                { name: 'Operations', icon: '🚚', prefix: 'Ops:', color: '#14b8a6', bgColor: '#f0fdfa' },
+                { name: 'SaaS', icon: '💻', prefix: 'SaaS:', color: '#6366f1', bgColor: '#eef2ff' }
+            ];
+            
+            var html = '';
+            for (var i = 0; i < engines.length; i++) {
+                var engine = engines[i];
+                var kpis = [];
+                var totalProgress = 0;
+                
+                for (var key in sheetActuals) {
+                    if (key.indexOf(engine.prefix) === 0 && key !== 'Metric') {
+                        var actual = parseNum(sheetActuals[key]);
+                        var target = getTarget(key);
+                        kpis.push({ name: key, actual: actual, target: target });
+                        if (target > 0) {
+                            totalProgress += Math.min(actual / target, 1);
+                        }
+                    }
+                }
+                
+                if (kpis.length === 0) continue;
+                
+                var avgProgress = totalProgress / kpis.length;
+                var status = getStatus(avgProgress);
+                
+                var kpiHtml = '';
+                for (var j = 0; j < kpis.length; j++) {
+                    kpiHtml += createKPICard(kpis[j].name, kpis[j].actual, kpis[j].target, engine.color);
+                }
+                
+                var modeLabel = viewMode === 'annual' ? 'Annual' : 'Q' + selectedQuarter;
+                html += '<div class="card overflow-hidden engine-card" style="border-left-color: ' + engine.color + '">' +
+                    '<div class="p-4" style="background: ' + engine.bgColor + '">' +
+                        '<div class="flex items-center justify-between">' +
+                            '<div class="flex items-center gap-3">' +
+                                '<span class="text-2xl">' + engine.icon + '</span>' +
+                                '<div>' +
+                                    '<h3 class="font-semibold text-gray-800">' + engine.name + ' Engine</h3>' +
+                                    '<span class="text-xs text-gray-500">' + kpis.length + ' KPIs • ' + modeLabel + ' targets</span>' +
+                                '</div>' +
+                            '</div>' +
+                            '<div class="text-right">' +
+                                '<div class="text-lg font-bold text-gray-800">' + (avgProgress * 100).toFixed(0) + '%</div>' +
+                                '<span class="text-xs px-2 py-0.5 rounded-full ' + status.class + '">' + status.status + '</span>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="p-4 bg-gray-50">' +
+                        '<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">' + kpiHtml + '</div>' +
+                    '</div>' +
+                '</div>';
+            }
+            
+            document.getElementById('content-engines').innerHTML = html;
+        }
+
+        function updateOperationsTab() {
+            var html = '';
+            for (var key in sheetActuals) {
+                if (key.indexOf('Ops:') === 0) {
+                    var actual = parseNum(sheetActuals[key]);
+                    var target = getTarget(key);
+                    html += createKPICard(key, actual, target, '#14b8a6');
+                }
+            }
+            document.getElementById('operationsKPIs').innerHTML = html || '<p class="text-gray-500 col-span-4">No operations data yet.</p>';
+        }
+
+        function updateGrowthTab() {
+            var marketingHtml = '';
+            for (var key in sheetActuals) {
+                if (key.indexOf('Marketing:') === 0) {
+                    var actual = parseNum(sheetActuals[key]);
+                    var target = getTarget(key);
+                    marketingHtml += createKPICard(key, actual, target, '#ef4444');
+                }
+            }
+            document.getElementById('marketingKPIs').innerHTML = marketingHtml || '<p class="text-gray-500 col-span-6">No marketing data yet.</p>';
+            
+            var saasHtml = '';
+            for (var key in sheetActuals) {
+                if (key.indexOf('SaaS:') === 0) {
+                    var actual = parseNum(sheetActuals[key]);
+                    var target = getTarget(key);
+                    saasHtml += createKPICard(key, actual, target, '#6366f1');
+                }
+            }
+            document.getElementById('saasKPIs').innerHTML = saasHtml || '<p class="text-gray-500 col-span-5">No SaaS data yet.</p>';
+        }
+
+        // ===========================================
+        // INITIALIZATION
+        // ===========================================
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshData();
+            setInterval(refreshData, 120000);
+        });
+    </script>
+</body>
+</html>
